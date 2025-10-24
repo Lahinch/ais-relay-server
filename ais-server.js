@@ -1,4 +1,5 @@
 // AIS Stream Relay Server for Render.com
+// AIS Stream Relay Server for Render.com
 const WebSocket = require('ws');
 const http = require('http');
 
@@ -97,7 +98,7 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-        BoundingBoxes: [[[-12, 50], [-4, 57]]], // Extended Ireland + approaches
+        BoundingBoxes: [[[-90, -180], [90, 180]]], // TEMPORARY: Global for testing
         FilterMessageTypes: ["PositionReport"]
       };
       
