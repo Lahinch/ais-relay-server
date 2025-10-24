@@ -98,7 +98,7 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-        BoundingBoxes: [[[-90, -180], [90, 180]]],
+      BoundingBoxes: [[[-10.5, 51.5], [-5.5, 55.5]]] // Ireland bounding box
         FilterMessageTypes: ["PositionReport"]
       };
       
