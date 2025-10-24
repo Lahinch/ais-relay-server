@@ -1,0 +1,22 @@
+{
+  "name": "ais-relay-server",
+  "version": "1.0.0",
+  "description": "AIS Stream relay server for browser clients",
+  "main": "ais-server.js",
+  "scripts": {
+    "start": "node ais-server.js",
+    "dev": "nodemon ais-server.js"
+  },
+  "keywords": ["ais", "websocket", "maritime", "tracking"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
