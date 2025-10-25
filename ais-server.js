@@ -98,7 +98,8 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-        BoundingBoxes: [[[-12, 50], [-4, 57]]], // Ireland + approaches
+        // Ireland and surrounding waters
+   BoundingBoxes: [[[51, -11], [56, -5]]],
         FilterMessageTypes: ["PositionReport"]
       };
       
