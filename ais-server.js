@@ -1,4 +1,5 @@
 
+
 // AIS Stream Relay Server for Render.com
 const WebSocket = require('ws');
 const http = require('http');
@@ -98,9 +99,8 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-        // Ireland and surrounding waters
-   BoundingBoxes: [[[51, -11], [56, -5]]],
-        FilterMessageTypes: ["PositionReport"]
+        BoundingBoxes: [[[51, -11], [56, -5]]], // Ireland and surrounding waters
+        FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Get both position and ship info
       };
       
       aisConnection.send(JSON.stringify(subscription));
