@@ -1,5 +1,4 @@
 
-
 // AIS Stream Relay Server for Render.com
 const WebSocket = require('ws');
 const http = require('http');
@@ -99,12 +98,14 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-       BoundingBoxes: [[[51, -13.5], [56, -5]]],
-        FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Get both position and ship info
+        // --- MODIFIED: Expanded bounding box to cover all of Ireland + Atlantic ---
+        BoundingBoxes: [[[50, -16], [57, -4]]], 
+        // --- MODIFIED: Added SARAircraftReport back in ---
+        FilterMessageTypes: ["PositionReport", "ShipStaticData", "SARAircraftReport"] 
       };
       
       aisConnection.send(JSON.stringify(subscription));
-      console.log('📨 Subscription sent');
+      console.log('📨 Subscription sent with new, larger bounding box.');
       
       broadcastToClients({
         type: 'status',
@@ -115,6 +116,18 @@ function connectToAISStream() {
     
     aisConnection.on('message', (data) => {
       messageCount++;
+      
+      // --- NEW: Add this log to debug ---
+      if (messageCount % 20 === 0) { // Log every 20th message
+        try {
+          const msg = JSON.parse(data.toString());
+          if (msg.Message?.PositionReport) {
+            // Log the longitude to check our filter
+            console.log(`[Debug Log] Received position with lon: ${msg.Message.PositionReport.Longitude.toFixed(3)}`);
+          }
+        } catch (e) { /* ignore parse errors */ }
+      }
+      // --- End of new log ---
       
       try {
         broadcastToClients({
