@@ -99,7 +99,7 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-        BoundingBoxes: [[[50, -20], [57, -4]]], // EXPANDED: Ireland + deep into Atlantic
+       BoundingBoxes: [[[51, -13.5], [56, -5]]]
         FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Get both position and ship info
       };
       
