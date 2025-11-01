@@ -99,7 +99,7 @@ function connectToAISStream() {
       
       const subscription = {
         APIKey: AIS_API_KEY,
-       BoundingBoxes: [[[51, -13.5], [56, -5]]]
+       BoundingBoxes: [[[51, -13.5], [56, -5]]],
         FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Get both position and ship info
       };
       
