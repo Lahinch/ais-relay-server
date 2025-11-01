@@ -1,4 +1,3 @@
-
 // AIS Stream Relay Server for Render.com
 const WebSocket = require('ws');
 const http = require('http');
@@ -105,7 +104,7 @@ function connectToAISStream() {
       };
       
       aisConnection.send(JSON.stringify(subscription));
-      console.log('📨 Subscription sent with new, larger bounding box.');
+      console.log('📨 Subscription sent with new, larger bounding box: [[50, -16], [57, -4]]');
       
       broadcastToClients({
         type: 'status',
