@@ -100,7 +100,8 @@ function connectToAISStream() {
         // --- MODIFIED: Expanded bounding box to cover all of Ireland + Atlantic ---
         BoundingBoxes: [[[50, -16], [57, -4]]], 
         // --- MODIFIED: Added SARAircraftReport back in ---
-        FilterMessageTypes: ["PositionReport", "ShipStaticData", "SARAircraftReport"] 
+     
+        FilterMessageTypes: ["PositionReport", "ShipStaticData"] // Removed SARAircraftReport
       };
       
       aisConnection.send(JSON.stringify(subscription));
