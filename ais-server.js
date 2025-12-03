@@ -2,8 +2,7 @@
 const WebSocket = require('ws');
 const http = require('http');
 
-const AIS_API_KEY = process.env.AIS_API_KEY; // CHANGE: don’t hardcode secrets
-if (!AIS_API_KEY) console.warn('⚠️  Missing AIS_API_KEY env var (set this in Render)'); // ADD
+const AIS_API_KEY = "f63580b31f6c9771f4892b28e028a1126d2a5167";
 const PORT = process.env.PORT || 10000;
 
 // Create HTTP server
