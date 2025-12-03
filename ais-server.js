@@ -101,7 +101,17 @@ function connectToAISStream() {
         BoundingBoxes: [[[50, -16], [57, -4]]], 
         // --- MODIFIED: Added SARAircraftReport back in ---
      
-        FilterMessageTypes: ["PositionReport", "ShipStaticData" , "SARAircraftReport"] // Removed SARAircraftReport
+       FilterMessageTypes: [
+  "PositionReport",
+  "ShipStaticData",
+
+  // ADD these two so you actually see lots of small craft (Class B):
+  "StandardClassBPositionReport",        // ADD
+  "ExtendedClassBPositionReport",        // ADD
+
+  // CHANGE this name to AISStream’s:
+  "StandardSearchAndRescueAircraftReport" // CHANGE
+] // Removed SARAircraftReport
       };
       
       aisConnection.send(JSON.stringify(subscription));
