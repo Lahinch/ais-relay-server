@@ -2,7 +2,8 @@
 const WebSocket = require('ws');
 const http = require('http');
 
-const AIS_API_KEY = "f63580b31f6c9771f4892b28e028a1126d2a5167";
+const AIS_API_KEY = process.env.AIS_API_KEY; // CHANGE: don’t hardcode secrets
+if (!AIS_API_KEY) console.warn('⚠️  Missing AIS_API_KEY env var (set this in Render)'); // ADD
 const PORT = process.env.PORT || 10000;
 
 // Create HTTP server
@@ -79,6 +80,8 @@ const wss = new WebSocket.Server({
 let aisConnection = null;
 let reconnectTimer = null;
 let messageCount = 0;
+let aisPingInterval = null; // ADD
+let lastAisPong = 0; // CHANGE: updated on connect/pong
 const startTime = Date.now();
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 10;
@@ -87,33 +90,51 @@ function connectToAISStream() {
   console.log(`🛰️  Connecting to AISStream (attempt ${reconnectAttempts + 1})...`);
   
   try {
+    // ADD: cleanup any previous connection/interval before creating a new one
+    if (aisPingInterval) { clearInterval(aisPingInterval); aisPingInterval = null; } // ADD
+    if (aisConnection) {
+      try { aisConnection.terminate(); } catch (e) {} // ADD
+      aisConnection = null; // ADD
+    }
     aisConnection = new WebSocket('wss://stream.aisstream.io/v0/stream', {
       handshakeTimeout: 10000
+    });
+
+    // ADD: track pong so we can detect stale AISStream connections
+    aisConnection.on('pong', () => {
+      lastAisPong = Date.now();
     });
     
     aisConnection.on('open', () => {
       console.log('✅ Connected to AISStream');
+      lastAisPong = Date.now(); // ADD: mark connection as fresh
+      // ADD: keep AISStream socket alive + detect stale connections
+if (aisPingInterval) clearInterval(aisPingInterval);
+aisPingInterval = setInterval(() => {
+  if (aisConnection && aisConnection.readyState === WebSocket.OPEN) {
+    try { aisConnection.ping(); } catch (e) {}
+  }
+  // if we haven't seen a pong in 90s, force reconnect
+  if (Date.now() - lastAisPong > 90000) {
+    console.warn("⚠️ AISStream pong timeout — closing to reconnect"); // ADD
+    try { aisConnection.terminate(); } catch (e) {} // ADD
+  }
+}, 30000);
       reconnectAttempts = 0; // Reset counter on success
       
-      const subscription = {
-        APIKey: AIS_API_KEY,
-        // --- MODIFIED: Expanded bounding box to cover all of Ireland + Atlantic ---
-        BoundingBoxes: [[[50, -16], [57, -4]]], 
-        // --- MODIFIED: Added SARAircraftReport back in ---
-     
-       FilterMessageTypes: [
-  "PositionReport",
-  "ShipStaticData",
-
-  // ADD these two so you actually see lots of small craft (Class B):
-  "StandardClassBPositionReport",        // ADD
-  "ExtendedClassBPositionReport",        // ADD
-
-  // CHANGE this name to AISStream’s:
-  "StandardSearchAndRescueAircraftReport" // CHANGE
-] // Removed SARAircraftReport
-      };
-      
+     const subscription = {
+  APIKey: AIS_API_KEY,
+  BoundingBoxes: [[[50, -16], [57, -4]]], 
+  FilterMessageTypes: [
+    "PositionReport",
+    "ShipStaticData",
+    "StandardClassBPositionReport",
+    "ExtendedClassBPositionReport",
+      "LongRangeAisBroadcastMessage", // ADD
+    "StandardSearchAndRescueAircraftReport"
+  ]
+};
+      // Deleted nested aisConnection.on('pong', ...) block here as per instructions
       aisConnection.send(JSON.stringify(subscription));
       console.log('📨 Subscription sent with new, larger bounding box: [[50, -16], [57, -4]]');
       
@@ -165,6 +186,7 @@ function connectToAISStream() {
     aisConnection.on('close', (code, reason) => {
       console.warn(`🔒 AISStream closed: ${code} - ${reason || 'no reason'}`);
       aisConnection = null;
+      if (aisPingInterval) { clearInterval(aisPingInterval); aisPingInterval = null; } // ADD
       
       broadcastToClients({
         type: 'status',
@@ -283,6 +305,7 @@ server.listen(PORT, () => {
 process.on('SIGTERM', () => {
   console.log('⏹️  Shutting down gracefully...');
   if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (aisPingInterval) { clearInterval(aisPingInterval); aisPingInterval = null; } // ADD
   if (aisConnection) aisConnection.close();
   wss.clients.forEach(client => {
     try {
